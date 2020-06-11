@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="name">
+    <button id="setname">加入聊天</button>
+    <input type="text" id="text">
+    <button id="btn" type="button">发送</button> 
+    <div id="container">
+
+    </div>
+   <script>
+        var ws=null;
+        
+       document.getElementById('setname').onclick = function() {
+         var name = document.getElementById('name').value;
+          if(name === '')return console.log("名字为空");
+           
+          ws = new WebSocket('ws://localhost:8001');
+           
+          //在建立连接时会触发
+           ws.onopen = function(){
+            //向服务器发送消息
+            ws.send(JSON.stringify({
+                name:name,
+                type:'setname'
+            }));
+          }
+
+            document.getElementById('btn').onclick = send;
+            document.getElementById('text').onkeyup = function(e) {
+                if(e.keyCode !== 13) return;
+                send();
+            }
+       
+       //自动接收服务器返回的数据
+       //e代表一个事件  
+       ws.onmessage = function(e){   
+          var con = document.getElementById('container');
+        
+          //insertBefore(要插入的内容，要插入的位置之前)
+         con.insertBefore(createChatPanel(JSON.parse(e.data)),con.children[0]);
+       }
+       //将加入房间按钮设置不可用（只能加入一次）
+       document.getElementById('setname').setAttribute('disabled',true);
+    }
+
+      function createChatPanel(data) {
+            var name = data.name;
+            var text = data.text;
+
+            var div = document.createElement('div');
+            var span1= document.createElement('span1');
+            var span2= document.createElement('span2');
+
+            span1.innerHTML = name + ' ' + new Date().format("yyyy-MM-dd hh:mm:ss");
+            span2.innerHTML = text;
+
+            span1.style.color = '#00f';
+            span2.style.fontWeight = '900';
+
+            div.appendChild(span1);
+            div.appendChild(document.createElement('br'));
+            div.appendChild(span2);
+            return div;
+        }
+         //发送消息
+          function send() {
+            var text=document.getElementById('text');
+                if(text.value === '')return;
+                ws.send(JSON.stringify({
+                 text:text.value,
+                 type:"chat"
+            }));             
+          text.value = '';
+          }
+    //Date的原型中扩展了format方法，使其可以方便的格式化日期格式输出。
+   Date.prototype.format = function(fmt) { 
+     var o = { 
+        "M+" : this.getMonth()+1,                 //月份 
+        "d+" : this.getDate(),                    //日 
+        "h+" : this.getHours(),                   //小时 
+        "m+" : this.getMinutes(),                 //分 
+        "s+" : this.getSeconds(),                 //秒 
+        "q+" : Math.floor((this.getMonth()+3)/3), //季度 
+        "S"  : this.getMilliseconds()             //毫秒 
+    }; 
+    if(/(y+)/.test(fmt)) {
+            fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+    }
+     for(var k in o) {
+        if(new RegExp("("+ k +")").test(fmt)){
+             fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+         }
+     }
+    return fmt; 
+}     
+    </script>
+</body>
+</html>
