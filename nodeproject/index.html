@@ -21,7 +21,7 @@
          var name = document.getElementById('name').value;
           if(name === '')return console.log("名字为空");
            
-          ws = new WebSocket('ws://localhost:8001');
+          ws = new WebSocket('ws://kolento.club:8001');
            
           //在建立连接时会触发
            ws.onopen = function(){
@@ -58,7 +58,7 @@
             var span1= document.createElement('span1');
             var span2= document.createElement('span2');
 
-            span1.innerHTML = name + ' ' + new Date().format("yyyy-MM-dd hh:mm:ss");
+            span1.innerHTML = name + '' + new Date().format("yyyy-MM-dd hh:mm:ss");
             span2.innerHTML = text;
 
             span1.style.color = '#00f';
